@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عجلة الأبطال | Heroes Wheel</title>
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --background: #f4f9f9;
+            --text-dark: #2c3e50;
+            --shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        header {
+            background-color: var(--primary);
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            color: white;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 40px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 28px;
+            transition: opacity 0.3s ease;
+        }
+
+        /* تنسيق التوقيع ليكون على اليمين في العربي */
+        .header-signature {
+            position: absolute;
+            right: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        /* تنسيق زر اللغة ليكون على اليسار في العربي */
+        .lang-btn {
+            position: absolute;
+            left: 20px;
+            background-color: white;
+            color: var(--primary);
+            border: none;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s, all 0.3s ease;
+        }
+
+        /* عند التحويل للإنجليزية يتم عكس الأماكن */
+        html[dir="ltr"] .header-signature {
+            right: auto;
+            left: 20px;
+        }
+
+        html[dir="ltr"] .lang-btn {
+            left: auto;
+            right: 20px;
+        }
+
+        .lang-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* إخفاء العناصر الجانبية في الشاشات الصغيرة جداً لتجنب التداخل */
+        @media(max-width: 450px) {
+            header h1 {
+                font-size: 20px;
+            }
+            .header-signature, .lang-btn {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+            .header-signature { right: 10px; }
+            .lang-btn { left: 10px; }
+            html[dir="ltr"] .header-signature { left: 10px; right: auto; }
+            html[dir="ltr"] .lang-btn { right: 10px; left: auto; }
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 95%;
+            max-width: 800px;
+            gap: 20px;
+        }
+
+        @media(min-width: 768px) {
+            .container {
+                flex-direction: row;
+                align-items: flex-start;
+                justify-content: center;
+            }
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            resize: none;
+            font-size: 16px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            color: white;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        button:disabled {
+            background-color: #bdc3c7 !important;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-add { background-color: var(--secondary); }
+        .btn-add:hover { background-color: #45b7b0; }
+
+        .btn-clear { background-color: #e74c3c; }
+        .btn-clear:hover { background-color: #c0392b; }
+
+        .btn-reset { background-color: #f39c12; }
+        .btn-reset:hover { background-color: #e67e22; }
+
+        .btn-spin {
+            background-color: var(--primary);
+            font-size: 24px;
+            padding: 15px 40px;
+            margin-top: 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 0 #c0392b;
+        }
+        .btn-spin:active {
+            box-shadow: 0 0 0 #c0392b;
+            transform: translateY(4px);
+        }
+
+        .wheel-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .wheel-wrapper {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 20px 0;
+        }
+
+        @media(min-width: 400px) {
+            .wheel-wrapper {
+                width: 380px;
+                height: 380px;
+            }
+        }
+
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #e74c3c;
+            z-index: 10;
+            filter: drop-shadow(0 4px 2px rgba(0,0,0,0.3));
+        }
+
+        #wheelCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.1, 1);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            animation: pop 0.5s cubic-bezier(0.17, 0.89, 0.32, 1.49);
+            width: 80%;
+            max-width: 400px;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content h2 {
+            font-size: 36px;
+            color: var(--primary);
+            margin: 0 0 10px 0;
+        }
+
+        .modal-content p {
+            font-size: 24px;
+            color: var(--text-dark);
+            margin-bottom: 25px;
+        }
+
+        .btn-close {
+            background-color: var(--secondary);
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button id="langBtn" class="lang-btn">English</button>
+        <h1 id="appTitle">عجلة الأبطال 🌟</h1>
+        <div id="signatureText" class="header-signature">تصميم: أ/ سارة نبيل</div>
+    </header>
+
+    <div class="container">
+        <section class="controls">
+            <textarea id="namesInput" placeholder="أدخلي أسماء الأبطال هنا...&#10;مثال:&#10;أحمد&#10;مريم&#10;عمر"></textarea>
+            <button class="btn-add" id="addBtn">إضافة الأسماء</button>
+            <button class="btn-reset" id="resetRoundBtn">جولة جديدة</button>
+            <button class="btn-clear" id="clearBtn">مسح الكل</button>
+        </section>
+
+        <section class="wheel-section">
+            <div class="wheel-wrapper">
+                <div class="pointer"></div>
+                <canvas id="wheelCanvas" width="600" height="600"></canvas>
+            </div>
+            <button class="btn-spin" id="spinBtn" disabled>لف العجلة 🎡</button>
+        </section>
+    </div>
+
+    <div id="winnerModal" class="modal">
+        <div class="modal-content">
+            <h2 id="winnerName">اسم البطل</h2>
+            <p id="winnerMsg">دورك يا بطل!</p>
+            <button class="btn-close" id="closeModalBtn">متابعة</button>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            ar: {
+                title: "عجلة الأبطال 🌟",
+                placeholder: "أدخلي أسماء الأبطال هنا...\nمثال:\nأحمد\nمريم\nعمر",
+                addBtn: "إضافة الأسماء",
+                resetBtn: "جولة جديدة",
+                clearBtn: "مسح الكل",
+                spinBtn: "لف العجلة 🎡",
+                footer: "تصميم: أ/ سارة نبيل",
+                turnMsg: "دورك يا بطل!",
+                continueBtn: "متابعة",
+                emptyWheel: "أضف أسماء",
+                allDone: "أحسنت! كل الأبطال شاركوا",
+                langBtn: "English",
+                dir: "rtl"
+            },
+            en: {
+                title: "Heroes Wheel 🌟",
+                placeholder: "Enter heroes names here...\nExample:\nAhmed\nMaryam\nOmar",
+                addBtn: "Add Names",
+                resetBtn: "New Round",
+                clearBtn: "Clear All",
+                spinBtn: "Spin Wheel 🎡",
+                footer: "Designed by: T/ Sara Nabil",
+                turnMsg: "Your turn, Hero!",
+                continueBtn: "Continue",
+                emptyWheel: "Add names",
+                allDone: "Well done! All heroes participated",
+                langBtn: "عربي",
+                dir: "ltr"
+            }
+        };
+
+        let currentLang = 'ar';
+
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const namesInput = document.getElementById('namesInput');
+        const addBtn = document.getElementById('addBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const resetRoundBtn = document.getElementById('resetRoundBtn');
+        const spinBtn = document.getElementById('spinBtn');
+        const winnerModal = document.getElementById('winnerModal');
+        const winnerNameEl = document.getElementById('winnerName');
+        const winnerMsgEl = document.getElementById('winnerMsg');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const langBtn = document.getElementById('langBtn');
+        const signatureText = document.getElementById('signatureText');
+
+        let students = [];
+        let currentRotation = 0;
+        let isSpinning = false;
+
+        const palette = [
+            '#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', 
+            '#118AB2', '#EF476F', '#073B4C', '#F78C6B', 
+            '#83D483', '#A05195', '#F95D6A', '#2F4B7C'
+        ];
+
+        function switchLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            const t = translations[currentLang];
+            
+            document.documentElement.lang = currentLang;
+            document.documentElement.dir = t.dir;
+
+            document.getElementById('appTitle').textContent = t.title;
+            namesInput.placeholder = t.placeholder;
+            addBtn.textContent = t.addBtn;
+            resetRoundBtn.textContent = t.resetBtn;
+            clearBtn.textContent = t.clearBtn;
+            spinBtn.textContent = t.spinBtn;
+            signatureText.textContent = t.footer;
+            closeModalBtn.textContent = t.continueBtn;
+            langBtn.textContent = t.langBtn;
+
+            initWheel();
+        }
+
+        langBtn.addEventListener('click', switchLanguage);
+
+        function initWheel() {
+            const lines = namesInput.value.split('\n').map(line => line.trim()).filter(line => line !== '');
+            const t = translations[currentLang];
+
+            if (lines.length === 0) {
+                students = [{ text: t.emptyWheel, active: false, color: '#bdc3c7' }];
+                spinBtn.disabled = true;
+            } else {
+                students = lines.map((name, index) => ({
+                    text: name,
+                    active: true,
+                    color: palette[index % palette.length]
+                }));
+                spinBtn.disabled = false;
+            }
+            drawWheel();
+        }
+
+        function drawWheel() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = Math.min(centerX, centerY) - 10;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const sliceAngle = (2 * Math.PI) / students.length;
+
+            students.forEach((student, i) => {
+                const startAngle = i * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = student.active ? student.color : '#e0e0e0';
+                ctx.fill();
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(startAngle + sliceAngle / 2);
+                
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = student.active ? '#ffffff' : '#a0a0a0';
+                ctx.font = 'bold 35px "Segoe UI", Arial, sans-serif';
+                
+                if(student.active) {
+                    ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetX = 2;
+                    ctx.shadowOffsetY = 2;
+                }
+                
+                ctx.fillText(student.text, radius - 30, 0);
+                ctx.restore();
+            });
+        }
+
+        function spin() {
+            if (isSpinning) return;
+            
+            const activeStudents = students.map((s, index) => ({...s, index})).filter(s => s.active);
+            const t = translations[currentLang];
+            
+            if (activeStudents.length === 0) {
+                showModal(t.allDone, "", false);
+                return;
+            }
+
+            isSpinning = true;
+            spinBtn.disabled = true;
+            addBtn.disabled = true;
+            langBtn.disabled = true;
+
+            const winner = activeStudents[Math.floor(Math.random() * activeStudents.length)];
+            const winnerIndex = winner.index;
+
+            const sliceAngle = 360 / students.length;
+            const sliceCenterDeg = (winnerIndex * sliceAngle) + (sliceAngle / 2);
+            const targetBaseDeg = 270 - sliceCenterDeg;
+            
+            const currentMod = currentRotation % 360;
+            let diff = targetBaseDeg - currentMod;
+            if (diff <= 0) diff += 360;
+
+            const extraSpins = 360 * 5;
+            currentRotation += diff + extraSpins;
+
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                spinBtn.disabled = false;
+                addBtn.disabled = false;
+                langBtn.disabled = false;
+                
+                showModal(students[winnerIndex].text, t.turnMsg, true, winnerIndex);
+            }, 4000);
+        }
+
+        function showModal(title, msg, isWinner, winnerIndex = -1) {
+            winnerNameEl.textContent = title;
+            winnerMsgEl.textContent = msg;
+            winnerMsgEl.style.display = msg ? 'block' : 'none';
+            winnerModal.style.display = 'flex';
+
+            closeModalBtn.onclick = () => {
+                winnerModal.style.display = 'none';
+                if (isWinner && winnerIndex !== -1) {
+                    students[winnerIndex].active = false;
+                    drawWheel();
+                }
+            };
+        }
+
+        addBtn.addEventListener('click', initWheel);
+        
+        clearBtn.addEventListener('click', () => {
+            namesInput.value = '';
+            initWheel();
+        });
+
+        resetRoundBtn.addEventListener('click', () => {
+            students.forEach(s => s.active = true);
+            drawWheel();
+        });
+
+        spinBtn.addEventListener('click', spin);
+
+        initWheel();
+    </script>
+</body>
+</html>
